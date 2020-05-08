@@ -13,13 +13,13 @@ SIMPLE_TEST = """
 
 def read_file(testdir: Testdir, base_dir: str) -> str:
     """Reads file with canonical data or output data"""
-    return testdir.tmpdir.join('{}/test_sth (call)/result.txt'.format(base_dir)).read()
+    return testdir.tmpdir.join('{}/test_sth/result.txt'.format(base_dir)).read()
 
 
 def write_file(testdir: Testdir, base_dir: str, data: str) -> None:
     """Writes file with canonical data or output data"""
-    os.makedirs('{}/test_sth (call)'.format(base_dir), exist_ok=True)
-    testdir.tmpdir.join('{}/test_sth (call)/result.txt'.format(base_dir)).new().write(data.encode())
+    os.makedirs('{}/test_sth'.format(base_dir), exist_ok=True)
+    testdir.tmpdir.join('{}/test_sth/result.txt'.format(base_dir)).new().write(data.encode())
 
 
 def test_no_canonical_data(testdir: Testdir) -> None:
