@@ -6,8 +6,7 @@ from _pytest.pytester import Testdir
 
 SIMPLE_TEST = """
     def test_sth(canonical_data):
-        canonical_result = canonical_data('result.txt', 'text')
-        canonical_result.assert_equal('123')
+        assert canonical_data('result.txt', 'str') == '123'
 """
 
 
@@ -27,7 +26,7 @@ def test_no_canonical_data(testdir: Testdir) -> None:
     result = testdir.runpytest('-v')
 
     result.stdout.fnmatch_lines(['FAILED*::test_sth*'])
-    result.stdout.fnmatch_lines(['*MissingFileException*'])
+    result.stdout.fnmatch_lines(['*Canonical data with name `result.txt` does not exist*'])
 
     assert read_file(testdir, '_output_data') == '123'
     assert result.ret == 1
@@ -40,7 +39,11 @@ def test_mismatching_canonical_data(testdir: Testdir) -> None:
     result = testdir.runpytest('-v')
 
     result.stdout.fnmatch_lines(['FAILED*::test_sth*'])
-    result.stdout.fnmatch_lines(['*MismatchException*'])
+    result.stdout.fnmatch_lines([
+        "*AssertionError: assert '345' == '123'*",
+        "*- 123",
+        "*+ 345",
+    ])
 
     assert read_file(testdir, '_output_data') == '123'
     assert result.ret == 1

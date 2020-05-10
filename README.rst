@@ -27,16 +27,6 @@ Inspired by `Yandex's canondata plugin`_, `pytest-needle`_ and `pytest-regtest`_
 This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
 
 
-TODO
-----
-
-* Implement pytest's hooks for asserts
-* Use pytest's asserts for comparing objects
-* Driver for images
-* Driver for json
-* HTML reports for images
-
-
 Installation
 ------------
 
@@ -51,17 +41,18 @@ Usage
 Plugin provides ``canonical_data`` fixture, which allows to create canonical results::
 
     def test_sth(canonical_data):
-        # creates canonical result object with name `result.txt` and `text` driver
-        canonical_result = canonical_data('result.txt', 'text')
-        # In default mode will compare saved canonical result with `123` string
-        # In canonize mode will save `123` as the canonical result
-        canonical_result.assert_equal('123')
+        # In the default mode will compare the `result.txt` canonical result with `123` string using `str` driver
+        # In the canonize mode will save `123` as the `result.txt` canonical result
+        assert canonical_data('result.txt', 'text') == '123'
 
 To run in canonize mode execute::
 
     pytest --canonize
 
 It will create files with canonical results (if don't exist) and save actual results.
+
+The plugin saves canonical results in ``canonical_data`` directory next to the test file. It also saves actual results
+values in ``_output_data`` directory (for debug purposes).
 
 Drivers
 ^^^^^^^
@@ -70,8 +61,13 @@ You need to use appropriate driver for each data type. Currently, there are the 
 
 * ``bytes``: for comparing bytes sequences.
 * ``str``: for comparing python strings.
-* ``text``: alias for the ``str`` driver.
 
+TODO
+----
+
+* Driver for images
+* Driver for json
+* HTML reports for images
 
 
 Contributing

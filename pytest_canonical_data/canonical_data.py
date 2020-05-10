@@ -2,7 +2,6 @@ import os
 from typing import Any
 
 from pytest_canonical_data.drivers import get_driver
-from pytest_canonical_data.exceptions import MismatchException, MissingFileException
 
 
 class CanonicalData:
@@ -18,22 +17,34 @@ class CanonicalData:
         self.canonize = canonize
         self.driver = get_driver(driver)
 
-    def assert_equal(self, output_data: Any) -> None:
+    class Empty:
         """
-        Checks input with canonical file.
+        ``None`` is a valid value for the data stored in a file,
+        so we return ``CanonicalData.Empty`` if a file does not exist.
+        """
+        pass
 
-        In canonize mode overwrites canonical file instead.
+    def get_data(self) -> Any:
+        """Returns data stored in canonical data file"""
+        if self.driver.exists(self.canonical_data_path):
+            return self.driver.read(self.canonical_data_path)
+        return self.Empty
 
-        .. todo::
-            Implement pytest hook to overwrite ``==`` asserts in tests.
+    def __eq__(self, output_data: Any) -> bool:
+        """
+        Compares ``output_data`` with data in canonical file.
+
+        In canonize mode overwrites canonical file with actual data.
         """
         self.driver.write(self.output_data_path, output_data)
 
-        try:
-            canonical_data = self.driver.read(self.canonical_data_path)
-            self.driver.assert_equal(canonical_data, output_data)
-        except (MissingFileException, MismatchException):
-            if self.canonize:
-                self.driver.write(self.canonical_data_path, output_data)
-            else:
-                raise
+        canonical_data = self.get_data()
+        if output_data == canonical_data:
+            # canonical data exists and is equal to output_data
+            return True
+        if self.canonize:
+            self.driver.write(self.canonical_data_path, output_data)
+            return True
+        return False
+
+
