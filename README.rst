@@ -61,6 +61,7 @@ You need to use appropriate driver for each data type. Currently, there are the 
 
 * ``bytes``: for comparing bytes sequences.
 * ``str``: for comparing python strings.
+* ``json``: for comparing objects which can be loaded from and dumped to json.
 
 TODO
 ----

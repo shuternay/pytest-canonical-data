@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any
 from abc import abstractmethod
@@ -45,10 +46,23 @@ class TextDriver(Driver):
         super().write(path, data.encode())
 
 
+class JsonDriver(Driver):
+    def read(self, path: str) -> Any:
+        if not os.path.exists(path):
+            raise MissingFileException('file {} does not exist'.format(path))
+        with open(path) as fp:
+            return json.load(fp)
+
+    def write(self, path: str, data: Any) -> None:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as fp:
+            json.dump(data, fp)
+
+
 DRIVERS = {
     'bytes': BytesDriver,
     'str': TextDriver,
-    'text': TextDriver,
+    'json': JsonDriver,
 }
 
 

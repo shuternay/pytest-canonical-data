@@ -70,6 +70,31 @@ def test_canonize(testdir: Testdir) -> None:
     assert result.ret == 0
 
 
+def test_json_driver(testdir: Testdir) -> None:
+    write_file(testdir, 'canonical_data', '{"x" : 123}')
+
+    testdir.makepyfile("""
+        def test_sth(canonical_data):
+            assert canonical_data('result.txt', 'json') == {'x': 123}
+    """)
+    result = testdir.runpytest('-v')
+
+    result.stdout.fnmatch_lines(['*::test_sth PASSED*'])
+    assert read_file(testdir, '_output_data') == '{"x": 123}'
+    assert result.ret == 0
+
+    testdir.makepyfile("""
+        def test_sth(canonical_data):
+            assert canonical_data('result.txt', 'json') == {'y': 1234}
+    """)
+    result = testdir.runpytest('-v')
+
+    result.stdout.fnmatch_lines(['*::test_sth FAILED*'])
+    result.stdout.fnmatch_lines(["*AssertionError: assert {'x': 123} == {'y': 1234}*"])
+    assert read_file(testdir, '_output_data') == '{"y": 1234}'
+    assert result.ret == 1
+
+
 def test_help_message(testdir):
     result = testdir.runpytest(
         '--help',
