@@ -10,9 +10,16 @@ SIMPLE_TEST = """
 """
 
 
-def read_file(testdir: Testdir, base_dir: str) -> str:
+CLASS_TEST = """
+    class TestClass:
+        def test_sth(self, canonical_data):
+            assert canonical_data('result.txt', 'str') == '123'
+"""
+
+
+def read_file(testdir: Testdir, base_dir: str, test_name: str = 'test_sth') -> str:
     """Reads file with canonical data or output data"""
-    return testdir.tmpdir.join('{}/test_sth/result.txt'.format(base_dir)).read()
+    return testdir.tmpdir.join('{}/{}/result.txt'.format(base_dir, test_name)).read()
 
 
 def write_file(testdir: Testdir, base_dir: str, data: str) -> None:
@@ -95,7 +102,17 @@ def test_json_driver(testdir: Testdir) -> None:
     assert result.ret == 1
 
 
-def test_help_message(testdir):
+def test_class_test_filename(testdir: Testdir) -> None:
+    testdir.makepyfile(CLASS_TEST)
+    result = testdir.runpytest('-v', '--canonize')
+
+    result.stdout.fnmatch_lines(['*TestClass::test_sth PASSED*'])
+    assert read_file(testdir, 'canonical_data', 'TestClass_test_sth') == '123'
+    assert read_file(testdir, '_output_data', 'TestClass_test_sth') == '123'
+    assert result.ret == 0
+
+
+def test_help_message(testdir: Testdir) -> None:
     result = testdir.runpytest(
         '--help',
     )

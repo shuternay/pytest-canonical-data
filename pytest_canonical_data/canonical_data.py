@@ -9,7 +9,7 @@ class CanonicalData:
         self.file_name = file_name
         # TODO: better test name extraction
         test_path, self.test_name = os.getenv('PYTEST_CURRENT_TEST').split('::', 1)
-        self.test_name = self.test_name.replace(' (call)', '')
+        self.test_name = self.test_name.replace(' (call)', '').replace('::', '_')
 
         self.test_base_dir = os.path.dirname(os.path.abspath(test_path))
         self.canonical_data_path = os.path.join(self.test_base_dir, 'canonical_data', self.test_name, self.file_name)
@@ -46,5 +46,3 @@ class CanonicalData:
             self.driver.write(self.canonical_data_path, output_data)
             return True
         return False
-
-
